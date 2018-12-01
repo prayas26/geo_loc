@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html> 
+<head> 
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" /> 
+  <title>Team Blu!</title> 
+  <script src="http://maps.google.com/maps/api/js?key={{api_key}}" 
+          type="text/javascript"></script>
+  <style>
+      * {
+        box-sizing: border-box;
+      }
+    
+    /* Create two equal columns that floats next to each other */
+      .column {
+        float: left;
+        width: 100%;
+      }
+    
+    /* Clear floats after the columns */
+      .canvas:after {
+        display: table;
+        clear: both;
+      }
+    
+      .topnav {
+        overflow: hidden;
+        background-color: #333;
+      }
+    
+      .topnav a {
+        float: left;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 17px;
+      }
+    
+      .topnav a:hover {
+        background-color: #4CAF50;
+        color: black;
+      }
+    
+      .topnav a.active {
+        background-color: #4CAF50;
+        color: white;
+      }
+      </style>
+</head> 
+<body>
+  <div class="topnav">
+    {% if 'login' in session %}
+      {% if session['usertype'] == "admin" %}
+        <a href="/dashboard">Dashboard</a>
+      {% endif %}
+      {% if session['usertype'] == "user" %}
+        <!--   <a href="/profile">Profile</a> -->
+        <a href="/request">Service Request</a>
+      {% endif %}
+      <a href="/logout">Logout</a>
+    {% else %}
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    {% endif %}
+  </div>
+  <div style="width: 100%; height: 100vh" id="map"></div>
+  <script type="text/javascript">
+    // var locations = {{ locations|tojson }};
+    var pre_lat = {{ pre_lat }};
+    var pre_lng = {{ pre_lng }};
+    var locations = {{ locations|tojson|safe }};
+
+    var map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 8,
+      center: new google.maps.LatLng(pre_lat, pre_lng),
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+
+    var infowindow = new google.maps.InfoWindow();
+
+    var marker, i;
+    for (i = 0; i < locations.length; i++) {
+      marker = new google.maps.Marker({
+        position: new google.maps.LatLng(locations[i][2], locations[i][3]),
+        map: map
+      });
+
+      google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        return function() {
+          infowindow.open(map, marker);
+          function initMap() {
+            var pointA = new google.maps.LatLng("{{pre_lat}}", "{{pre_lng}}"),
+              pointB = new google.maps.LatLng(locations[i][2], locations[i][3]),
+            myOptions = {
+            zoom: 7,
+            center: pointA
+          },
+          map = new google.maps.Map(document.getElementById('map'), myOptions),
+          directionsService = new google.maps.DirectionsService,
+          directionsDisplay = new google.maps.DirectionsRenderer({
+            map: map
+          }),
+          markerA = new google.maps.Marker({
+            position: pointA,
+            title: "point A",
+            label: "",
+            map: map
+          }),
+          markerB = new google.maps.Marker({
+            position: pointB,
+            title: "point B",
+            label: "",
+            map: map
+          });
+          for (i = 0; i < locations.length; i++) {  
+            marker = new google.maps.Marker({
+              position: new google.maps.LatLng(locations[i][2], locations[i][3]),
+              map: map
+            });
+
+            google.maps.event.addListener(marker, 'click', (function(marker, i) {
+              return function() {
+                infowindow.setContent(locations[i][0]);
+                infowindow.open(map, marker);
+                calculateAndDisplayRoute(directionsService, directionsDisplay, pointA, new google.maps.LatLng(locations[i][2], locations[i][3]));
+              }
+            })(marker, i));
+          }
+
+          calculateAndDisplayRoute(directionsService, directionsDisplay, pointA, pointB);
+        }
+        function calculateAndDisplayRoute(directionsService, directionsDisplay, pointA, pointB) {
+          directionsService.route({
+          origin: pointA,
+          destination: pointB,
+          travelMode: google.maps.TravelMode.DRIVING
+        },
+        function(response, status) {
+          if (status == google.maps.DirectionsStatus.OK) {
+            directionsDisplay.setDirections(response);
+          }
+          else {
+            window.alert('Directions request failed due to ' + status);
+          }
+        });
+      }
+      initMap();
+    }
+  })(marker, i));
+}
+  </script>
+</body>
+</html>

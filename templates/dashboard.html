@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+div.gallery {
+    border: 1px solid #ccc;
+}
+
+div.gallery:hover {
+    border: 1px solid #777;
+}
+
+div.gallery img {
+    width: 400px;
+    height: 400px;
+}
+
+div.desc {
+    padding: 15px;
+    text-align: center;
+    background-color: #8b1f1b;
+    color: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.responsive {
+    padding: 0 6px;
+    float: left;
+}
+
+@media only screen and (max-width: 400px) {
+    .responsive {
+        width: 49.99999%;
+        margin: 6px 0;
+    }
+}
+
+@media only screen and (max-width: 400px) {
+    .responsive {
+        width: 100%;
+        height: 400px;
+    }
+}
+
+.clearfix:after {
+    display: table;
+    clear: both;
+}
+.myButton {
+	background-color:rgba(189, 189, 149, 0.959);
+	-moz-border-radius:42px;
+	-webkit-border-radius:42px;
+	border-radius:42px;
+	border:1px solid #b2b8ad;
+	display:inline-block;
+	cursor:pointer;
+	color:#757d6f;
+	font-family:Arial;
+	font-size:24px;
+	padding:11px 76px;
+	text-decoration:none;
+}
+.myButton:hover {
+	background-color:transparent;
+}
+.myButton:active {
+	position:relative;
+	top:1px;
+}
+
+.canvas:after {
+    display: table;
+    clear: both;
+}
+
+.topnav {
+    overflow: hidden;
+    background-color: #333;
+}
+
+.topnav a {
+    float: left;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+}
+
+.topnav a:hover {
+    background-color: #4CAF50;
+    color: black;
+}
+
+.topnav a.active {
+    background-color: #4CAF50;
+    color: white;
+}
+</style>
+</head>
+<body>
+    <div class="topnav">
+        <a href="/">Home</a>
+        <a href="/dashboard" class="active">Open Requests</a>
+        <a href="/closedrequests">Closed Requests</a>
+        <a href="/logout">Logout</a>
+    </div>
+{% for i in range(locations|count) %}
+<div class="responsive">
+  <div class="gallery">
+    <img src="{{ img_path[i] }}" alt="{{locations[i][0]}}" width="400" height="400">
+    <div class="desc">
+        <form action="/closerequest" method="POST">
+            <p>Registered by: {{ locations[i][-1] }}</p>
+            <p>Unique ID: {{ locations[i][0] }}</p>
+            <input type="hidden" name="un_id" value="{{locations[i][0]}}">
+            <input type="submit" class="myButton" value="Close Request">
+        </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<div class="clearfix"></div>
+
+</body>
+</html>
